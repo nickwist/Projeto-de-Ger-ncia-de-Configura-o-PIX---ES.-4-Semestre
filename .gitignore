@@ -1,0 +1,17 @@
+#Compilação
+*.class
+bin/
+out/
+target/
+
+#IDE
+.vscode/
+.idea/
+*.iml
+
+# Sistema operacional
+.DS_Store
+Thumbs.db
+
+# Logs
+*.log
