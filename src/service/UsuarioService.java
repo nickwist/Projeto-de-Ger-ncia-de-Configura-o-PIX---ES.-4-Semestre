@@ -5,7 +5,7 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.Optional;
 
-public class UsuarioServise {
+public class UsuarioService {
     private List<Usuario> usuarios = new ArrayList<>();
     private int proximoId = 1;
 
