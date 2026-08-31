@@ -21,11 +21,21 @@ public class ContaService {
                       .findFirst();
     }
 
-    public boolean atualizarNumeroConta(String numeroAntigo, String novoNumero) {
+    public boolean atualizarConta(String numeroAntigo, String novoNumero, Usuario novoDono) {
         Optional<ContaBancaria> contaOpt = buscarPorNumero(numeroAntigo);
         if (contaOpt.isPresent()) {
-            contaOpt.get().setNumeroConta(novoNumero);
+            Contabancaria conta = contaOpt.get();
+
+            if (novoNumero != null && !novoNumero.isEmpty()) {
+                conta.setNumeroConta(novoNumero);
+            }
+
+            if (novoDono != null) {
+                conta.setDono(novoDono);
+            }
+
             return true;
+
         }
         return false;
     }
