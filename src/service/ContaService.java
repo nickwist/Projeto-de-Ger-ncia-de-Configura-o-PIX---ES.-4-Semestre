@@ -1,4 +1,4 @@
-package service;
+package service; //Aqui mantemos tudo relacionado a conta (criar, buscar, atualizar, receber, transferir)
 
 import java.util.ArrayList;
 import java.util.List;
@@ -77,6 +77,36 @@ public class ContaService {
         }
 
         //se a conta não existe
+        return false;
+    }
+    public boolean receberViaPix(String chave, double valor){
+        Optional<ContaBancaria> contaOpt = buscarPorChavePix(chave);
+        //se encontrar a conta, deposita nela o valor
+        if (contaOpt.isPresent()){
+            contaOpt.get().depositar(valor);
+            return true;
+        }
+        return false;
+    }
+
+    public boolean transferirViaPix(String chaveOrigem, String chaveDestino, double valor){
+        Optional<ContaBancaria> contaOrigemOpt  = buscarPorChavePix(chaveOrigem);
+
+        Optional<ContaBancaria> contaDestinoOpt = buscarPorChavePix(chaveDestino);
+
+        if(!contaOrigemOpt.isPresent() || !contaDestinoOpt.isPresent()){
+            return false;
+        }
+
+        ContaBancaria contaOrigem = contaOrigemOpt.get();
+        ContaBancaria contaDestino = contaDestinoOpt.get();
+
+        //tenta sacar o valor da conta de origem pra ver se tem saldo
+        if(contaOrigem.sacar(valor)){
+            contaDestino.depositar(valor);
+            return true;
+        }
+
         return false;
     }
 }
