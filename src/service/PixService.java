@@ -52,4 +52,17 @@ public class PixService {
 
         return false;
     }
+
+    public boolean associarChave(ContaBancaria contaDestino, String chave, String tipo) {
+        if (contaDestino == null || chave == null || tipo == null) {
+            return false
+        }
+
+        if (!validarChave(chave, tipo)) {
+            return false;
+        }
+
+        contaDestino.adicionarChavePix(chave);
+        return true;
+    }
 }
