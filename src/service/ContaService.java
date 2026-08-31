@@ -8,6 +8,7 @@ import java.util.Optional;
 
 public class ContaService {
     private List<ContaBancaria> contas = new ArrayList<>();
+    private List<ContaBancaria> chavesPix = new ArrayList<>();
 
     public ContaBancaria criarConta(String numeroConta, Usuario dono) {
         ContaBancaria novaConta = new ContaBancaria(numeroConta, dono);
@@ -46,5 +47,9 @@ public class ContaService {
 
     public List<ContaBancaria> listarContas() {
         return contas;
+    }
+
+    public void adicionarChavePix(String chave) {
+        chavesPix.add(chave)
     }
 }
