@@ -8,7 +8,7 @@ import java.util.Optional;
 
 public class ContaService {
     private List<ContaBancaria> contas = new ArrayList<>();
-    private List<ContaBancaria> chavesPix = new ArrayList<>();
+    private List<String> chavesPix = new ArrayList<>();
 
     public ContaBancaria criarConta(String numeroConta, Usuario dono) {
         ContaBancaria novaConta = new ContaBancaria(numeroConta, dono);
@@ -25,7 +25,7 @@ public class ContaService {
     public boolean atualizarConta(String numeroAntigo, String novoNumero, Usuario novoDono) {
         Optional<ContaBancaria> contaOpt = buscarPorNumero(numeroAntigo);
         if (contaOpt.isPresent()) {
-            Contabancaria conta = contaOpt.get();
+            ContaBancaria conta = contaOpt.get();
 
             if (novoNumero != null && !novoNumero.isEmpty()) {
                 conta.setNumeroConta(novoNumero);
@@ -50,6 +50,6 @@ public class ContaService {
     }
 
     public void adicionarChavePix(String chave) {
-        chavesPix.add(chave)
+        chavesPix.add(chave);
     }
 }
