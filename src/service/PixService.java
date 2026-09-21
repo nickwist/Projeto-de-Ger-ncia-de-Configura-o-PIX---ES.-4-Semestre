@@ -2,7 +2,7 @@ package service;
 
 import model.ContaBancaria;
 import java.util.UUID;
-import java.util.regex.Pattern;
+//import java.util.regex.Pattern;
 
 public class PixService {
     
