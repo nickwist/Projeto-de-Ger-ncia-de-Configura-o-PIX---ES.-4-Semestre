@@ -10,7 +10,12 @@ import model.StatusTransacao;
 import model.Transacao; 
 //listas
 import java.util.ArrayList; 
-import java.util.List; 
+import java.util.List;
+//informar a hora
+import java.time.LocalDate;
+
+import model.Transacao;
+import model.Usuario;
 
 public class TransacaoService {
     //gerencia: transaçoes e consultas
@@ -86,5 +91,38 @@ public class TransacaoService {
     public List<Transacao> getHistoricoTransacoes(){
         return histTransacoes;
     }
+
+    ///////CONSULTAS E NOTIFICACOES, BRANCH feature/consultas-e-notificacoes
+    
+    //listando todas as transações
+    public List<Transacao> ListarTodas(){
+        return new ArrayList<>(histTransacoes);
+    }
+
+    //filtrando por data(certificando que ela existe)
+    public List<Transacao> filtrarPorData(LocalDate dataDesejada){
+        if(dataDesejada == null){
+            throw new IllegalArgumentException("Insira uma data válida.");
+        }
+
+        //criar a lista vazia que vai guardar os resultados
+        List<Transacao> transacoesFiltradas = new ArrayList<>();
+
+        //percorrer a lista de transações com o for tradicional
+        for (Transacao transacao : histTransacoes) {
+            // comparar apenas o ano, mês e dia da data/hora da transação
+            if (transacao.getDataHora().toLocalDate().equals(dataDesejada)) {
+                transacoesFiltradas.add(transacao);
+            }
+        }
+        return transacoesFiltradas;
+    }
+
+    //envio de notificacoes
+    //importar transacao e usuario
+
+    //enviar tipo um popup só pra dar o feedback da transacao
+    //caso a transacao n foi bem sucedida(ou seja, transacao nula, e o usuario de destino tbm n recebeu nada)
+    //melhor criar uma classe pra isso, pra gerência de feedback?
 }
 
