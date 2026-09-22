@@ -14,8 +14,8 @@ import java.util.List;
 //informar a hora
 import java.time.LocalDate;
 
-import model.Transacao;
-import model.Usuario;
+//import model.Transacao;
+//import model.Usuario;
 
 public class TransacaoService {
     //gerencia: transaçoes e consultas
