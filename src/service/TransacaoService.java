@@ -14,8 +14,8 @@ import java.util.List;
 //informar a hora
 import java.time.LocalDate;
 
-//import model.Transacao;
-//import model.Usuario;
+import model.Transacao;
+import model.Usuario;
 
 public class TransacaoService {
     //gerencia: transaçoes e consultas
@@ -43,8 +43,13 @@ public class TransacaoService {
         if (origem.getSaldo() < valor){
             throw new IllegalArgumentException("Você não tem saldo suficiente.");
         }
+
+        //n tem como fazer transaçao envolvendo a conta bloqueada
+        if(origem.isBloqueada() || destino.isBloqueada()){
+            throw new IllegalStateException("Não foi possível realizar a transação. Uma das contas (ou ambas) estão bloqueadas.");
+        }
         
-        //se tem saldo e o valor é válido, conseguimos fazer o Pixie
+        //se tem saldo e o valor é válido e a conta n estã bloqueada, conseguimos fazer o Pixie
 
         //criar uma nova transaçao
 
@@ -124,5 +129,32 @@ public class TransacaoService {
     //enviar tipo um popup só pra dar o feedback da transacao
     //caso a transacao n foi bem sucedida(ou seja, transacao nula, e o usuario de destino tbm n recebeu nada)
     //melhor criar uma classe pra isso, pra gerência de feedback?
+
+
+    ////GERANDO RELATORIOS
+    //reunir todas as transaçoes que envolvem o usuario
+    public List<Transacao> gerarRelatorioPorUsuario(int idUsuario) {
+        
+        //criar a lista vazia para armazenar as transacoes pro relatorio
+        List<Transacao> relatorio = new ArrayList<>();
+
+        //percorr todas as transações do historico
+        for (Transacao transacao : histTransacoes) {
+            //verificar se o usuário procurado é a origem da transação (pagador)
+            boolean comoContaOrigem = transacao.getContaOrigem().getDono() != null 
+                && transacao.getContaOrigem().getDono().getId() == idUsuario;
+            
+            //verifica se o usuário procurado é o destino da transação (recebedor)
+            boolean contaComoDestino = transacao.getContaDestino().getDono() != null 
+                && transacao.getContaDestino().getDono().getId() == idUsuario;
+            
+            //se o usuário participou em qualquer uma das formas, add na lista
+            if (comoContaOrigem || contaComoDestino) {
+                relatorio.add(transacao);
+            }
+        }
+
+        return relatorio;
+    }
 }
 

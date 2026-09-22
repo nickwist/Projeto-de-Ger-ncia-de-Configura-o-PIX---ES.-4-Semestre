@@ -30,6 +30,7 @@ public class ContaBancaria {
     public boolean isBloqueada(){
         return bloqueada;
     }
+    //plus: garantir que não há como fazer transações envolvendo a conta bloqueada
     public void depositar(double valor) {
         if (valor > 0) {
             this.saldo += valor;
