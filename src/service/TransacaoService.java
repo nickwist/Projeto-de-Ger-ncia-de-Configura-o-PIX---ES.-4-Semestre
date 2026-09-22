@@ -156,5 +156,30 @@ public class TransacaoService {
 
         return relatorio;
     }
+
+    //gerar por período
+
+    //filtrar as transaçoes que ocorreram no periodo x
+    //colocar elas em uma lista e retorná-las
+    public List<Transacao> gerarRelatorioPorPeriodo(LocalDate inicio, LocalDate fim ){
+        //garantir que o usuario informou a data de inicio e a final
+        if(inicio == null || fim == null){
+            throw new IllegalArgumentException("Inserir os campos da data de inicio e/ou final.");
+        }
+        //garantir que a data inicio está depois da do final
+        if(inicio.isAfter(fim)){
+            throw new IllegalArgumentException("Data de início não pode ser maior que a final.");
+        }
+        //criar a lista
+        List<Transacao> relatorio = new ArrayList<>();
+        //percorrer o hist de transações uma a uma
+        for (Transacao t : histTransacoes) {
+            //extrair apenas a data da transação
+            t.getDataHora().toLocalDate();
+            relatorio.add(t);
+        }
+
+        return relatorio;
+    }
 }
 
