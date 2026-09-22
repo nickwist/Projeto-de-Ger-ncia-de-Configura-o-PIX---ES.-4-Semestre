@@ -14,6 +14,9 @@ import java.util.List;
 //informar a hora
 import java.time.LocalDate;
 
+import model.Transacao;
+import model.Usuario;
+
 public class TransacaoService {
     //gerencia: transaçoes e consultas
     private List<Transacao> histTransacoes = new ArrayList<>();
@@ -115,5 +118,11 @@ public class TransacaoService {
         return transacoesFiltradas;
     }
 
+    //envio de notificacoes
+    //importar transacao e usuario
+
+    //enviar tipo um popup só pra dar o feedback da transacao
+    //caso a transacao n foi bem sucedida(ou seja, transacao nula, e o usuario de destino tbm n recebeu nada)
+    //melhor criar uma classe pra isso, pra gerência de feedback?
 }
 
