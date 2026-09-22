@@ -32,6 +32,7 @@ public class ContaBancaria {
     public String getNumeroConta() { return numeroConta; }
     public void setNumeroConta(String numeroConta) { this.numeroConta = numeroConta; }
     public double getSaldo() { return saldo; }
+    public double setSaldo(double saldo) {return this.saldo = saldo; }
     public Usuario getDono() { return dono; }
     public void setDono(Usuario dono) { this.dono = dono; }
     public List<String> getChavesPix() { return chavesPix; }
