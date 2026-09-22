@@ -1,10 +1,13 @@
 package model;
 
+import java.util.ArrayList;
+import java.util.List;
+
 public class ContaBancaria {
     private String numeroConta;
     private double saldo;
     private Usuario dono;
-    private String chavePix;
+    private final  List<String> chavesPix = new ArrayList<>(); // o final no nome significa que essa variável nunca vai apontar pra outra lista depois de criada, mas que o conteúdo de dentro pode mudar com add
 
     public ContaBancaria(String numeroConta, Usuario dono) {
         this.numeroConta = numeroConta;
@@ -31,8 +34,8 @@ public class ContaBancaria {
     public double getSaldo() { return saldo; }
     public Usuario getDono() { return dono; }
     public void setDono(Usuario dono) { this.dono = dono; }
-    public String getChavePix() { return chavePix; }
-    public void setChavePix(String chavePix) { this.chavePix = chavePix; }
+    public List<String> getChavesPix() { return chavesPix; }
+    public void adicionarChavePix(String chavePix) { chavesPix.add(chavePix); }
 
     @Override
     public String toString() {

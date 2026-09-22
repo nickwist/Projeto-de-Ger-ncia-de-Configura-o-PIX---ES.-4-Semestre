@@ -1,8 +1,8 @@
 package service;
 
-import model.ContaBancaria;
 import java.util.UUID;
-//import java.util.regex.Pattern;
+
+import model.ContaBancaria;
 
 public class PixService {
     
@@ -39,4 +39,18 @@ public class PixService {
 
         return false;
     }
+
+    public boolean receber(ContaBancaria contaDestino, ContaBancaria contaOrigem, double valor) {
+        if (contaOrigem == null || contaDestino == null || valor <= 0) {
+            return false;
+        }
+
+        if (contaOrigem.sacar(valor)) {
+            contaDestino.depositar(valor);
+            return true;
+        }
+
+        return false;
+    }
+
 }
