@@ -1,6 +1,7 @@
 package service;
 
 import java.util.UUID;
+
 import model.ContaBancaria;
 
 public class PixService {
