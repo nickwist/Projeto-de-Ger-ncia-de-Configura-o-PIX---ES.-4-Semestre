@@ -11,8 +11,9 @@ import model.Transacao;
 //listas
 import java.util.ArrayList; 
 import java.util.List;
-//informar a hora
+//informar a hora e data
 import java.time.LocalDate;
+import java.time.LocalDateTime;
 
 import model.Transacao;
 import model.Usuario;
@@ -53,7 +54,7 @@ public class TransacaoService {
 
         //criar uma nova transaçao
 
-        Transacao transacao = new Transacao(proximoId++, origem, destino, valor, null, null);
+        Transacao transacao = new Transacao(proximoId++, origem, destino, valor, null, LocalDateTime.now());
 
         //retira o valor da conta de origem e o coloca na conta do destino
 
@@ -175,8 +176,11 @@ public class TransacaoService {
         //percorrer o hist de transações uma a uma
         for (Transacao t : histTransacoes) {
             //extrair apenas a data da transação
-            t.getDataHora().toLocalDate();
-            relatorio.add(t);
+            java.time.LocalDate dataTransacao = t.getDataHora().toLocalDate();
+            //verificar se a data da transação está dentro do período informado
+            if (!dataTransacao.isBefore(inicio) && !dataTransacao.isAfter(fim)){
+                relatorio.add(t);
+            }
         }
 
         return relatorio;
