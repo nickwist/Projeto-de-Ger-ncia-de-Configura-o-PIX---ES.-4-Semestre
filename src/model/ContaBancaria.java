@@ -7,7 +7,7 @@ public class ContaBancaria {
     private String numeroConta;
     private double saldo;
     private Usuario dono;
-    private final  List<String> chavesPix = new ArrayList<>(); // o final no nome significa que essa variável nunca vai apontar pra outra lista depois de criada, mas que o conteúdo de dentro pode mudar com add
+    private final  List<ChavePix> chavesPix = new ArrayList<>(); // o final no nome significa que essa variável nunca vai apontar pra outra lista depois de criada, mas que o conteúdo de dentro pode mudar com add
     //as contas costumam vir acessíveis
     private boolean bloqueada;
 
@@ -51,8 +51,8 @@ public class ContaBancaria {
     public double setSaldo(double saldo) {return this.saldo = saldo; }
     public Usuario getDono() { return dono; }
     public void setDono(Usuario dono) { this.dono = dono; }
-    public List<String> getChavesPix() { return chavesPix; }
-    public void adicionarChavePix(String chavePix) { chavesPix.add(chavePix); }
+    public List<ChavePix> getChavesPix() { return chavesPix; }
+    public void adicionarChavePix(ChavePix chavePix) { chavesPix.add(chavePix); }
 
     @Override
     public String toString() {
