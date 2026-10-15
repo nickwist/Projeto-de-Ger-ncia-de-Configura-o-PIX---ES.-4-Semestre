@@ -1,6 +1,7 @@
 package model;
 public enum StatusTransacao{
-    PENDENTE, // Transação registrada, mas n foi concluida
-    CONCLUIDA, // Valor transferido 
-    CANCELADA // Transação cancelada antes da conclusao
+    PENDENTE, // A transação ainda está pendente
+    CONCLUIDA, // A transferência foi concluída
+    CANCELADA, // A transação pendente foi cancelada
+    ESTORNADA // A transação concluída teve seu valor devolvido
 }

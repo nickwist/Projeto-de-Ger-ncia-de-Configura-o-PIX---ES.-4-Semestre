@@ -1,189 +1,245 @@
 package service;
-//regras de ngc, 
+//regras de ngc,
 //validacao de saldo;
 //transferencia
 //registro de historico
 //pendencias
 //importar as informaçoes das contas e da transação
-import model.ContaBancaria; 
-import model.StatusTransacao; 
-import model.Transacao; 
+import model.ContaBancaria;
+import model.StatusTransacao;
+import model.Transacao;
 //listas
-import java.util.ArrayList; 
+import java.util.ArrayList;
 import java.util.List;
 //informar a hora e data
 import java.time.LocalDate;
 import java.time.LocalDateTime;
 
-import model.Transacao;
-import model.Usuario;
-
 public class TransacaoService {
-    //gerencia: transaçoes e consultas
-    private List<Transacao> histTransacoes = new ArrayList<>();
-    private int proximoId = 1;
+	//gerencia: transaçoes e consultas
+	private List<Transacao> histTransacoes = new ArrayList<>();
+	private int proximoId = 1;
+	private static final double LIMITE_TRANSFERENCIA = 2000.00;
 
-    //consultar o saldo da conta, retornando quanto tem ainda
-    public double consultarSaldo(ContaBancaria conta){
-        if(conta == null){
-            throw new IllegalArgumentException("Fail: Conta Inválisa");
+	//consultar o saldo da conta, retornando quanto tem ainda
+	public double consultarSaldo(ContaBancaria conta) {
+		if(conta == null) {
+			throw new IllegalArgumentException("Fail: Conta Inválisa");
+		}
+		return conta.getSaldo();
+	}
+
+	//executar transaçao Pix
+	//adicionar transacao ao histórico(lista)
+	//validar o saldo e a transferencia entre conta origem e de destino, atualizando os valores
+
+	public Transacao execuTransacao(ContaBancaria origem, ContaBancaria destino, double valor) {
+
+        if (origem == null || destino == null) {
+            throw new IllegalArgumentException(
+                "As contas de origem e destino são obrigatórias."
+            );
         }
-        return conta.getSaldo();
-    }
 
-    //executar transaçao Pix
-    //adicionar transacao ao histórico(lista)
-    //validar o saldo e a transferencia entre conta origem e de destino, atualizando os valores
-    
-    public Transacao execuTransacao(ContaBancaria origem, ContaBancaria destino, double valor){
-        if(valor<=0){
-            throw new IllegalArgumentException("Valor inválido. Deve ser maior que 0.");
+        if (origem == destino) {
+            throw new IllegalArgumentException(
+                "A conta de origem não pode ser igual à conta de destino."
+            );
         }
 
-        //caso n tenha saldo na conta
-        if (origem.getSaldo() < valor){
-            throw new IllegalArgumentException("Você não tem saldo suficiente.");
-        }
+		if(valor<=0) {
+			throw new IllegalArgumentException("Valor inválido. Deve ser maior que 0.");
+		}
 
-        //n tem como fazer transaçao envolvendo a conta bloqueada
-        if(origem.isBloqueada() || destino.isBloqueada()){
-            throw new IllegalStateException("Não foi possível realizar a transação. Uma das contas (ou ambas) estão bloqueadas.");
-        }
-        
-        //se tem saldo e o valor é válido e a conta n estã bloqueada, conseguimos fazer o Pixie
+		//Verifica se o valor ultrapassa o limite por transferência
+		if (valor > LIMITE_TRANSFERENCIA) {
+			throw new IllegalArgumentException("Transferência não permitida. O limite por PIX é de R$ 2.000,00.");
+		}
 
-        //criar uma nova transaçao
+		//caso n tenha saldo na conta
+		if (origem.getSaldo() < valor) {
+			throw new IllegalArgumentException("Você não tem saldo suficiente.");
+		}
 
-        Transacao transacao = new Transacao(proximoId++, origem, destino, valor, null, LocalDateTime.now());
+		//n tem como fazer transaçao envolvendo a conta bloqueada
+		if(origem.isBloqueada() || destino.isBloqueada()) {
+			throw new IllegalStateException("Não foi possível realizar a transação. Uma das contas (ou ambas) estão bloqueadas.");
+		}
 
-        //retira o valor da conta de origem e o coloca na conta do destino
+		//se tem saldo e o valor é válido e a conta n estã bloqueada, conseguimos fazer o Pixie
 
-        origem.setSaldo(origem.getSaldo() - valor);
-        destino.setSaldo(destino.getSaldo() + valor);
+		//criar uma nova transaçao
 
-        //atualizando status
-        transacao.setStatus(StatusTransacao.CONCLUIDA);
+		Transacao transacao = new Transacao(proximoId++, origem, destino, valor, null, LocalDateTime.now());
 
-        //adicionar na lista de historico
-        histTransacoes.add(transacao);
+		//retira o valor da conta de origem e o coloca na conta do destino
 
-        return transacao;
+		origem.setSaldo(origem.getSaldo() - valor);
+		destino.setSaldo(destino.getSaldo() + valor);
 
-    }
+		//atualizando status
+		transacao.setStatus(StatusTransacao.CONCLUIDA);
 
-    // CANCELAR apenas UMA TRANSAÇAO PENDENTE
-    public boolean cancelarTransacao(int id) {
-        
-        // Percorrendo a lista de transações uma a uma
-        for (Transacao transacao : histTransacoes) {
-            //encontrar a transação com o ID procurado
-            if (transacao.getId() == id) {
-                // fazendo o filtro das transações PENDENTES , que podem ser canceladas
-                //mudando o status
-                if (transacao.getStatus() == StatusTransacao.PENDENTE) {
-                    transacao.setStatus(StatusTransacao.CANCELADA);
-                    return true;
+		//adicionar na lista de historico
+		histTransacoes.add(transacao);
+
+		return transacao;
+
+	}
+
+	// CANCELAR apenas UMA TRANSAÇAO PENDENTE
+	public boolean cancelarTransacao(int id) {
+
+		// Percorrendo a lista de transações uma a uma
+		for (Transacao transacao : histTransacoes) {
+			//encontrar a transação com o ID procurado
+			if (transacao.getId() == id) {
+				// fazendo o filtro das transações PENDENTES , que podem ser canceladas
+				//mudando o status
+				if (transacao.getStatus() == StatusTransacao.PENDENTE) {
+					transacao.setStatus(StatusTransacao.CANCELADA);
+					return true;
+				}
+
+				// Se encontrou o ID, mas não está PENDENTE, já podemos parar a busca
+				break;
+			}
+		}
+
+		// Retorna false se não encontrou o ID ou se a transação não estava PENDENTE
+		return false;
+	}
+
+	//estornar uma transação concluída
+	public boolean estornarTransacao(int id) {
+		for (Transacao transacao : histTransacoes) {
+			if (transacao.getId() == id) {
+
+				// Só permite estornar transações concluídas
+				if (transacao.getStatus() != StatusTransacao.CONCLUIDA) {
+					return false;
+				}
+
+				ContaBancaria origem = transacao.getContaOrigem();
+				ContaBancaria destino = transacao.getContaDestino();
+				double valor = transacao.getValor();
+
+                if (origem == null || destino == null) {
+                    return false;
                 }
-                
-                // Se encontrou o ID, mas não está PENDENTE, já podemos parar a busca
-                break; 
-            }
-        }
-        
-        // Retorna false se não encontrou o ID ou se a transação não estava PENDENTE
-        return false;
-    }
-    //retornando o histórico completo de transações
-    public List<Transacao> getHistoricoTransacoes(){
-        return histTransacoes;
-    }
 
-    ///////CONSULTAS E NOTIFICACOES, BRANCH feature/consultas-e-notificacoes
-    
-    //listando todas as transações
-    public List<Transacao> ListarTodas(){
-        return new ArrayList<>(histTransacoes);
-    }
+				// Verifica se o destinatário tem saldo suficiente
+				if (destino.getSaldo() < valor) {
+					return false;
+				}
 
-    //filtrando por data(certificando que ela existe)
-    public List<Transacao> filtrarPorData(LocalDate dataDesejada){
-        if(dataDesejada == null){
-            throw new IllegalArgumentException("Insira uma data válida.");
-        }
+				// Devolve o dinheiro para quem enviou
+				origem.setSaldo(origem.getSaldo() + valor);
 
-        //criar a lista vazia que vai guardar os resultados
-        List<Transacao> transacoesFiltradas = new ArrayList<>();
+				// Retira o dinheiro de quem recebeu
+				destino.setSaldo(destino.getSaldo() - valor);
 
-        //percorrer a lista de transações com o for tradicional
-        for (Transacao transacao : histTransacoes) {
-            // comparar apenas o ano, mês e dia da data/hora da transação
-            if (transacao.getDataHora().toLocalDate().equals(dataDesejada)) {
-                transacoesFiltradas.add(transacao);
-            }
-        }
-        return transacoesFiltradas;
-    }
+				// Atualiza o status da transação original
+				transacao.setStatus(StatusTransacao.ESTORNADA);
 
-    //envio de notificacoes
-    //importar transacao e usuario
+				return true;
+			}
+		}
 
-    //enviar tipo um popup só pra dar o feedback da transacao
-    //caso a transacao n foi bem sucedida(ou seja, transacao nula, e o usuario de destino tbm n recebeu nada)
-    //melhor criar uma classe pra isso, pra gerência de feedback?
+		// Transação não encontrada
+		return false;
+	}
+
+	//retornando o histórico completo de transações
+	public List<Transacao> getHistoricoTransacoes() {
+		return histTransacoes;
+	}
+
+	///////CONSULTAS E NOTIFICACOES, BRANCH feature/consultas-e-notificacoes
+
+	//listando todas as transações
+	public List<Transacao> ListarTodas() {
+		return new ArrayList<>(histTransacoes);
+	}
+
+	//filtrando por data(certificando que ela existe)
+	public List<Transacao> filtrarPorData(LocalDate dataDesejada) {
+		if(dataDesejada == null) {
+			throw new IllegalArgumentException("Insira uma data válida.");
+		}
+
+		//criar a lista vazia que vai guardar os resultados
+		List<Transacao> transacoesFiltradas = new ArrayList<>();
+
+		//percorrer a lista de transações com o for tradicional
+		for (Transacao transacao : histTransacoes) {
+			// comparar apenas o ano, mês e dia da data/hora da transação
+			if (transacao.getDataHora().toLocalDate().equals(dataDesejada)) {
+				transacoesFiltradas.add(transacao);
+			}
+		}
+		return transacoesFiltradas;
+	}
+
+	//envio de notificacoes
+	//importar transacao e usuario
+
+	//enviar tipo um popup só pra dar o feedback da transacao
+	//caso a transacao n foi bem sucedida(ou seja, transacao nula, e o usuario de destino tbm n recebeu nada)
+	//melhor criar uma classe pra isso, pra gerência de feedback?
 
 
-    ////GERANDO RELATORIOS
-    //reunir todas as transaçoes que envolvem o usuario
-    public List<Transacao> gerarRelatorioPorUsuario(int idUsuario) {
-        
-        //criar a lista vazia para armazenar as transacoes pro relatorio
-        List<Transacao> relatorio = new ArrayList<>();
+	////GERANDO RELATORIOS
+	//reunir todas as transaçoes que envolvem o usuario
+	public List<Transacao> gerarRelatorioPorUsuario(int idUsuario) {
 
-        //percorr todas as transações do historico
-        for (Transacao transacao : histTransacoes) {
-            //verificar se o usuário procurado é a origem da transação (pagador)
-            boolean comoContaOrigem = transacao.getContaOrigem().getDono() != null 
-                && transacao.getContaOrigem().getDono().getId() == idUsuario;
-            
-            //verifica se o usuário procurado é o destino da transação (recebedor)
-            boolean contaComoDestino = transacao.getContaDestino().getDono() != null 
-                && transacao.getContaDestino().getDono().getId() == idUsuario;
-            
-            //se o usuário participou em qualquer uma das formas, add na lista
-            if (comoContaOrigem || contaComoDestino) {
-                relatorio.add(transacao);
-            }
-        }
+		//criar a lista vazia para armazenar as transacoes pro relatorio
+		List<Transacao> relatorio = new ArrayList<>();
 
-        return relatorio;
-    }
+		//percorr todas as transações do historico
+		for (Transacao transacao : histTransacoes) {
+			//verificar se o usuário procurado é a origem da transação (pagador)
+			boolean comoContaOrigem = transacao.getContaOrigem().getDono() != null
+			                          && transacao.getContaOrigem().getDono().getId() == idUsuario;
 
-    //gerar por período
+			//verifica se o usuário procurado é o destino da transação (recebedor)
+			boolean contaComoDestino = transacao.getContaDestino().getDono() != null
+			                           && transacao.getContaDestino().getDono().getId() == idUsuario;
 
-    //filtrar as transaçoes que ocorreram no periodo x
-    //colocar elas em uma lista e retorná-las
-    public List<Transacao> gerarRelatorioPorPeriodo(LocalDate inicio, LocalDate fim ){
-        //garantir que o usuario informou a data de inicio e a final
-        if(inicio == null || fim == null){
-            throw new IllegalArgumentException("Inserir os campos da data de inicio e/ou final.");
-        }
-        //garantir que a data inicio está depois da do final
-        if(inicio.isAfter(fim)){
-            throw new IllegalArgumentException("Data de início não pode ser maior que a final.");
-        }
-        //criar a lista
-        List<Transacao> relatorio = new ArrayList<>();
-        //percorrer o hist de transações uma a uma
-        for (Transacao t : histTransacoes) {
-            //extrair apenas a data da transação
-            java.time.LocalDate dataTransacao = t.getDataHora().toLocalDate();
-            //verificar se a data da transação está dentro do período informado
-            if (!dataTransacao.isBefore(inicio) && !dataTransacao.isAfter(fim)){
-                relatorio.add(t);
-            }
-        }
+			//se o usuário participou em qualquer uma das formas, add na lista
+			if (comoContaOrigem || contaComoDestino) {
+				relatorio.add(transacao);
+			}
+		}
 
-        return relatorio;
-    }
+		return relatorio;
+	}
+
+	//gerar por período
+
+	//filtrar as transaçoes que ocorreram no periodo x
+	//colocar elas em uma lista e retorná-las
+	public List<Transacao> gerarRelatorioPorPeriodo(LocalDate inicio, LocalDate fim ) {
+		//garantir que o usuario informou a data de inicio e a final
+		if(inicio == null || fim == null) {
+			throw new IllegalArgumentException("Inserir os campos da data de inicio e/ou final.");
+		}
+		//garantir que a data inicio está depois da do final
+		if(inicio.isAfter(fim)) {
+			throw new IllegalArgumentException("Data de início não pode ser maior que a final.");
+		}
+		//criar a lista
+		List<Transacao> relatorio = new ArrayList<>();
+		//percorrer o hist de transações uma a uma
+		for (Transacao t : histTransacoes) {
+			//extrair apenas a data da transação
+			java.time.LocalDate dataTransacao = t.getDataHora().toLocalDate();
+			//verificar se a data da transação está dentro do período informado
+			if (!dataTransacao.isBefore(inicio) && !dataTransacao.isAfter(fim)) {
+				relatorio.add(t);
+			}
+		}
+
+		return relatorio;
+	}
 }
-

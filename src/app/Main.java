@@ -70,6 +70,27 @@ public class Main { //Só pra testar
 			System.out.println("Falhou como esperado: " + e.getMessage());
 		}
 
+		// Desbloqueia a conta da Maria antes de testar o limite
+		contaMaria.desbloquearConta();
+
+		System.out.println("Conta da Maria desbloqueada? " + !contaMaria.isBloqueada());
+
+		// Adiciona saldo para isolar o teste do limite
+		contaNick.depositar(3000.0);
+
+		System.out.println("Saldo do Nick para o teste: " + contaNick.getSaldo());
+
+		System.out.println("\n=== TESTE DE LIMITE PIX ===");
+
+		try {
+			transacaoService.execuTransacao(contaNick, contaMaria, 2500.0);
+
+			System.out.println("ERRO: a transferência acima do limite foi permitida!");
+
+		} catch (IllegalArgumentException e) {
+			System.out.println("Transferência rejeitada como esperado: " + e.getMessage());
+		}
+
 		contaMaria.desbloquearConta();
 		System.out.println("Conta da Maria desbloqueada? " + !contaMaria.isBloqueada());
 
@@ -136,7 +157,7 @@ public class Main { //Só pra testar
 
 		System.out.println("Conta encontrada pela chave? " + encontrou);
 
-        // TESTES DA BRANCH/FEAT DE DESBLOQUEIO DE CHAVE PIX SUSPENSA E ALTERAÇÃO DA CHAVE
+		// TESTES DA BRANCH/FEAT DE DESBLOQUEIO DE CHAVE PIX SUSPENSA E ALTERAÇÃO DA CHAVE
 		// TESTE DE SUSPENSÃO E DESBLOQUEIO DE CHAVE PIX
 		System.out.println("\n=== TESTE DE SUSPENSÃO E DESBLOQUEIO ===");
 
@@ -231,6 +252,30 @@ public class Main { //Só pra testar
 		                                   );
 
 		System.out.println("Alterou para chave invalida? " + alterouParaChaveInvalida);
+
+        // Teste de estorno de transação PIX
+        System.out.println("\n=== TESTE DE ESTORNO PIX ===");
+
+        // PREPARAÇÃO DO TESTE: adiciona saldo fictício para permitir o estorno.
+        // Em produção, o saldo deve ser alterado por uma operação financeira válida.
+        contaMaria.setSaldo(contaMaria.getSaldo() + 100.0);
+
+        double saldoOrigemAntes = contaNick.getSaldo();
+        double saldoDestinoAntes = contaMaria.getSaldo();
+
+        boolean estornoRealizado = transacaoService.estornarTransacao(t1.getId());
+
+        System.out.println("Estorno realizado: " + estornoRealizado);
+        System.out.println("Saldo de Nick antes: R$ " + saldoOrigemAntes);
+        System.out.println("Saldo de Nick depois: R$ " + contaNick.getSaldo());
+        System.out.println("Saldo de Maria antes: R$ " + saldoDestinoAntes);
+        System.out.println("Saldo de Maria depois: R$ " + contaMaria.getSaldo());
+        System.out.println("Status da transação: " + t1.getStatus());
+
+        // Testa se é possível estornar a mesma transação novamente
+        boolean segundoEstorno = transacaoService.estornarTransacao(t1.getId());
+
+        System.out.println("Segundo estorno realizado: " + segundoEstorno);
 
 	}
 
