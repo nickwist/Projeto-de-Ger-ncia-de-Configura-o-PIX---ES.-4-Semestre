@@ -2,12 +2,14 @@ package app; //precisamos de um pacote para agrupar as classes
 
 import model.ChavePix;
 import model.ContaBancaria;
+import model.Contato;
 import model.Usuario;
 import model.Transacao;
 import service.ContaService;
 import service.UsuarioService;
 import service.TransacaoService;
-import service.Notiificacao;
+import service.Notificacao;
+import service.ContatoService;
 
 import java.time.LocalDate;
 import java.util.List;
@@ -17,7 +19,8 @@ public class Main { //Só pra testar
 		UsuarioService usuarioService = new UsuarioService();
 		ContaService contaService = new ContaService();
 		TransacaoService transacaoService = new TransacaoService();
-		Notiificacao notificacao = new Notiificacao();
+		Notificacao notificacao = new Notificacao();
+		ContatoService contatoService = new ContatoService();
 
 		//FLUXO ANTIGO (PRIMEIRA ENTREGA PIX)
 
@@ -136,6 +139,44 @@ public class Main { //Só pra testar
 		                                       LocalDate.now().minusDays(7), LocalDate.now()
 		                                   );
 		System.out.println("Transações no período: " + relatorioPeriodo.size());
+
+		// ===== TESTES DE CONTATOS =====
+		System.out.println("\n===== TESTE DE CONTATOS =====");
+
+		// Nick adiciona Maria
+		boolean contatoAdicionado = contatoService.adicionarContato(nick, maria);
+		System.out.println("Maria adicionada aos contatos de Nick? " + contatoAdicionado);
+
+		// Tentar adicionar Maria novamente
+		boolean contatoDuplicado = contatoService.adicionarContato(nick, maria);
+		System.out.println("Tentar adicionar Maria novamente: " + contatoDuplicado);
+
+		// Tentar adicionar o próprio Nick
+		boolean contatoProprio = contatoService.adicionarContato(nick, nick);
+		System.out.println("Tentar adicionar a si mesmo: " + contatoProprio);
+
+		// Testar listagem de contatos
+		System.out.println("\n===== LISTAGEM DE CONTATOS =====");
+
+		List<Contato> contatosNick = contatoService.listarContatos(nick);
+
+		for (Contato contato : contatosNick) {
+			System.out.println(contato);
+		}
+
+		// Testar remoção de contato
+		System.out.println("\n===== REMOÇÃO DE CONTATOS =====");
+
+		boolean contatoRemovido = contatoService.removerContato(nick, maria.getId());
+
+		System.out.println("Maria removida dos contatos de Nick? " + contatoRemovido);
+
+		// Listar novamente para verificar se foi removida
+		System.out.println("Contatos de Nick após a remoção:");
+
+		for (Contato contato : contatoService.listarContatos(nick)) {
+			System.out.println(contato);
+		}
 
 		// TESTE DE CHAVES PIX
 
@@ -265,6 +306,10 @@ public class Main { //Só pra testar
 
         boolean estornoRealizado = transacaoService.estornarTransacao(t1.getId());
 
+		if (estornoRealizado) {
+    		notificacao.notificarEstorno(t1);
+		}
+
         System.out.println("Estorno realizado: " + estornoRealizado);
         System.out.println("Saldo de Nick antes: R$ " + saldoOrigemAntes);
         System.out.println("Saldo de Nick depois: R$ " + contaNick.getSaldo());
@@ -277,6 +322,16 @@ public class Main { //Só pra testar
 
         System.out.println("Segundo estorno realizado: " + segundoEstorno);
 
+		// ===== TESTE DO HISTÓRICO DE NOTIFICAÇÕES =====
+		System.out.println("\n===== HISTÓRICO DE NICK =====");
+		for (String mensagem : notificacao.listarNotificacoes(nick)) {
+			System.out.println(mensagem);
+		}
+
+		System.out.println("\n===== HISTÓRICO DE MARIA =====");
+		for (String mensagem : notificacao.listarNotificacoes(maria)) {
+			System.out.println(mensagem);
+		}
 	}
 
 	//PRA TESTAR TESTAR TESTAR TESTARO CÓDIGO, COPIAR ISSO AQUI DEBAIXO
