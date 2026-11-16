@@ -32,6 +32,7 @@ public class ApiServer {
 		app.get("/saude", ctx -> ctx.json(Map.of("status", "ok")));
 
 		new UsuarioController(usuarios, contas).registrar(app);
+		new ContaController(usuarios, contas).registrar(app);
 
 		return app;
 	}
@@ -55,6 +56,9 @@ public class ApiServer {
 			String rota;
 			try {
 				rota = ctx.endpointHandlerPath();
+				if (rota.startsWith("No handler")) {
+					rota = "(sem-rota)";
+				}
 			} catch (Exception e) {
 				rota = "(sem-rota)";
 			}

@@ -36,6 +36,25 @@ public final class Validacao {
 		return digitos;
 	}
 
+	public static String numeroConta(String valor) {
+		String numero = textoObrigatorio(valor, "numeroConta");
+		if (!numero.matches("^[0-9A-Za-z-]{3,20}$")) {
+			throw ApiException.invalido("NUMERO_CONTA_INVALIDO",
+			                            "O número da conta deve ter de 3 a 20 caracteres (letras, números e hífen).");
+		}
+		return numero;
+	}
+
+	public static double valorPositivo(Double valor, String campo) {
+		if (valor == null) {
+			throw ApiException.invalido("CAMPO_OBRIGATORIO", "O campo '" + campo + "' é obrigatório.");
+		}
+		if (valor.isNaN() || valor.isInfinite() || valor <= 0) {
+			throw ApiException.invalido("VALOR_INVALIDO", "O campo '" + campo + "' deve ser maior que zero.");
+		}
+		return valor;
+	}
+
 	public static int inteiro(String valor, String campo) {
 		try {
 			return Integer.parseInt(valor);
