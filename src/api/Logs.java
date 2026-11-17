@@ -7,7 +7,7 @@ import java.util.Map;
 
 /**
  * Observabilidade: logs estruturados em JSON (uma linha por evento),
- * correlation id e mascaramento de dados pessoais (LGPD).
+ * correlation id e mascaramento de dados pessoais (LGPD). Isso é bem útil
  */
 public final class Logs {
 	private Logs() {
@@ -49,7 +49,7 @@ public final class Logs {
 		return m;
 	}
 
-	// ---- mascaramento (LGPD): nunca logar CPF, e-mail ou telefone completos ----
+	// ---- mascaramento (LGPD): nunca logar CPF, e-mail ou telefone completos, Bluesman usa issokkkk ----
 
 	public static String mascararCpf(String cpf) {
 		if (cpf == null || cpf.length() != 11) {
@@ -73,7 +73,20 @@ public final class Logs {
 		return "(**) *****-" + tel.substring(tel.length() - 4);
 	}
 
-	// ---- JSON minimo, sem depender de biblioteca ----
+	public static String mascararChave(String tipo, String valor) {
+		if (tipo == null || valor == null) {
+			return "***";
+		}
+		switch (tipo) {
+			case "CPF": return mascararCpf(valor);
+			case "EMAIL": return mascararEmail(valor);
+			case "TELEFONE": return mascararTelefone(valor);
+			case "CNPJ": return valor.length() == 14 ? "**.***.***/****-" + valor.substring(12) : "***";
+			default: return valor.length() > 8 ? valor.substring(0, 8) + "..." : "***";
+		}
+	}
+
+	// ---- JSON minimo, sem depender de biblioteca menhuma ----
 
 	private static String json(Map<String, Object> m) {
 		StringBuilder sb = new StringBuilder("{");

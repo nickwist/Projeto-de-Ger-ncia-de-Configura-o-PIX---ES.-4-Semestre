@@ -33,6 +33,7 @@ public class ApiServer {
 
 		new UsuarioController(usuarios, contas).registrar(app);
 		new ContaController(usuarios, contas).registrar(app);
+		new ChaveController(contas).registrar(app);
 
 		return app;
 	}
