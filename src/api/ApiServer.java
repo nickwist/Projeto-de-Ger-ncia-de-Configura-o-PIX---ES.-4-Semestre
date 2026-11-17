@@ -6,6 +6,7 @@ import io.javalin.http.HttpResponseException;
 import java.util.Map;
 import java.util.UUID;
 import service.ContaService;
+import service.TransacaoService;
 import service.UsuarioService;
 
 /** Ponto de entrada da API REST do PIX (Javalin). */
@@ -16,12 +17,13 @@ public class ApiServer {
 
 		UsuarioService usuarios = new UsuarioService();
 		ContaService contas = new ContaService();
+		TransacaoService transacoes = new TransacaoService();
 
-		Javalin app = criar(usuarios, contas);
+		Javalin app = criar(usuarios, contas, transacoes);
 		app.start(porta);
 	}
 
-	static Javalin criar(UsuarioService usuarios, ContaService contas) {
+	static Javalin criar(UsuarioService usuarios, ContaService contas, TransacaoService transacoes) {
 		Javalin app = Javalin.create(config -> {
 			config.showJavalinBanner = false;
 		});
@@ -34,6 +36,7 @@ public class ApiServer {
 		new UsuarioController(usuarios, contas).registrar(app);
 		new ContaController(usuarios, contas).registrar(app);
 		new ChaveController(contas).registrar(app);
+		new TransacaoController(contas, transacoes).registrar(app);
 
 		return app;
 	}

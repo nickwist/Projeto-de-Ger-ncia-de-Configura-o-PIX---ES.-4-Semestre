@@ -55,6 +55,18 @@ public final class Validacao {
 		return valor;
 	}
 
+	// padroniza uma chave PIX digitada/recebida na URL ou no corpo para busca
+	public static String chaveParaBusca(String valor) {
+		String t = valor.trim();
+		if (t.contains("@")) {
+			return t.toLowerCase();
+		}
+		if (t.matches("[\\d.\\-()/\\s]+")) {
+			return t.replaceAll("\\D", "");
+		}
+		return t.toLowerCase();
+	}
+
 	public static int inteiro(String valor, String campo) {
 		try {
 			return Integer.parseInt(valor);

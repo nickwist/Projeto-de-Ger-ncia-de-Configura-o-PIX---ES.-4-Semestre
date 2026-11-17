@@ -11,7 +11,7 @@ import service.ContaService;
 import service.PixService;
 
 /**
- *Chaves PIX: (gerar, validar, associar a uma conta, consultar, alterar)
+ * Chaves PIX: gerar, validar, associar a uma conta, consultar, alterar,
  * suspender/desbloquear e remover. Reaproveita ContaService e PixService.
  */
 public class ChaveController {
@@ -55,12 +55,12 @@ public class ChaveController {
 		app.delete("/chaves/{valor}/suspensao", this::desbloquear);
 	}
 
-	// gera uma chave aleatoria SEM associar a nenhuma conta, ênfase nisso
+	// gera uma chave aleatoria (UUID) SEM associar a nenhuma conta
 	private void gerar(Context ctx) {
 		ctx.json(Map.of("chave", pix.gerarChaveAleatoria(), "tipo", "ALEATORIA", "associada", false));
 	}
 
-	// diz se a chave tem formato valido para o tipo e se esta disponivel ne
+	// diz se a chave tem formato valido para o tipo e se esta disponivel (nao cadastrada)
 	private void validar(Context ctx) {
 		ChaveRequest req = corpo(ctx);
 		String tipo = tipo(req.tipo());
@@ -85,7 +85,7 @@ public class ChaveController {
 			valor = normalizar(tipo, req.valor());
 		}
 
-		//regras do PIX
+		// regras do PIX
 		if (conta.isBloqueada()) {
 			throw ApiException.regra("CONTA_BLOQUEADA", "Não é possível cadastrar chave em uma conta bloqueada.");
 		}
@@ -102,7 +102,7 @@ public class ChaveController {
 
 		ChavePix criada;
 		if (tipo.equals("ALEATORIA")) {
-			// o PixService.validarChave ainda nao conhece o tipo ALEATORIA, então botei pra adicionar direto
+			// o PixService.validarChave ainda nao conhece o tipo ALEATORIA, entao adiciona direto
 			criada = new ChavePix(valor, tipo);
 			conta.adicionarChavePix(criada);
 		} else {
@@ -244,8 +244,7 @@ public class ChaveController {
 	}
 
 	private String valorDoPath(Context ctx) {
-		String v = ctx.pathParam("valor").trim();
-		return v.contains("@") ? v.toLowerCase() : v;
+		return Validacao.chaveParaBusca(ctx.pathParam("valor"));
 	}
 
 	private ContaBancaria contaDoPath(Context ctx) {
