@@ -10,14 +10,21 @@ public class UsuarioService {
     private int proximoId = 1;
 
     public Usuario cadastrar(String nome, String cpf, String email, String telefone) {
-        Usuario novoUsuario = new Usuario(proximoId++, nome, cpf, email, telefone);
+        Usuario novoUsuario = new Usuario(proximoId++, nome, cpf, email, telefone, "123456");
         usuarios.add(novoUsuario);
         return novoUsuario;
     }
 
-    public Optional<Usuario> buscarPorId(int id) {
+    // novo metodo com senha
+    public Usuario cadastrar(String nome, String cpf, String email, String telefone, String senha) {
+        Usuario novoUsuario = new Usuario(proximoId++, nome, cpf, email, telefone, senha);
+        usuarios.add(novoUsuario);
+        return novoUsuario;
+    }
+
+    public Optional<Usuario> buscarPorCpfOuEmail(String login) {
         return usuarios.stream()
-                .filter(u -> u.getId() == id)
+                .filter(u -> u.getCpf().equals(login) || u.getEmail().equalsIgnoreCase(login))
                 .findFirst();
     }
 
