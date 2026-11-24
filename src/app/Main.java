@@ -10,6 +10,7 @@ import service.UsuarioService;
 import service.TransacaoService;
 import service.Notificacao;
 import service.ContatoService;
+import service.AutenticacaoService;
 
 import java.time.LocalDate;
 import java.util.List;
@@ -21,6 +22,7 @@ public class Main { //Só pra testar
 		TransacaoService transacaoService = new TransacaoService();
 		Notificacao notificacao = new Notificacao();
 		ContatoService contatoService = new ContatoService();
+		AutenticacaoService autenticacaoService = new AutenticacaoService(usuarioService);
 
 		//FLUXO ANTIGO (PRIMEIRA ENTREGA PIX)
 
@@ -332,6 +334,28 @@ public class Main { //Só pra testar
 		for (String mensagem : notificacao.listarNotificacoes(maria)) {
 			System.out.println(mensagem);
 		}
+		// ===== TESTE DE AUTENTICAÇÃO E HISTÓRICO DE LOGINS =====
+		System.out.println("\n===== TESTE DE LOGIN E HISTÓRICO =====");
+
+		// 1. Cadastrar usuário com senha específica
+		Usuario jenifer = usuarioService.cadastrar("Jenifer", "34567890100", "jenifer@email.com", "85977777777", "senhaForte123");
+
+		// 2. Tentativa de login com senha errada (deve falhar)
+		boolean loginInvalido = autenticacaoService.login("jenifer@email.com", "senhaErrada").isPresent();
+		System.out.println("Login com senha errada funcionou? " + loginInvalido);
+
+		// 3. Tentativa de login com senha correta (deve funcionar)
+		boolean loginValido = autenticacaoService.login("jenifer@email.com", "senhaForte123").isPresent();
+		System.out.println("Login com senha correta funcionou? " + loginValido);
+		System.out.println("Usuário logado na sessão: " + autenticacaoService.getUsuarioLogado().get().getNome());
+
+		// 4. Logout
+		autenticacaoService.logout();
+		System.out.println("Continua autenticado após logout? " + autenticacaoService.estaAutenticado());
+
+		// 5. Exibir histórico de tentativas de login (requisito da Entrega 3)
+		System.out.println("\nHistórico de Logins registrados:");
+		autenticacaoService.getHistoricoLogins().forEach(System.out::println);
 	}
 
 	//PRA TESTAR TESTAR TESTAR TESTARO CÓDIGO, COPIAR ISSO AQUI DEBAIXO
