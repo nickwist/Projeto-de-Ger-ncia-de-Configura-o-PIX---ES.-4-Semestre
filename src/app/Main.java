@@ -405,8 +405,8 @@ public class Main { //Só pra testar
 					System.out.print("Senha: ");
 					String senha = scanner.nextLine();
 
-					if (authService.login(login, senha).isPresent()) {
-						System.out.println("Login aprovado! Bem-vindo(a), " + authService.getUsuarioLogado().get().getNome());
+					if (autenticacaoService.login(login, senha).isPresent()) {
+						System.out.println("Login aprovado! Bem-vindo(a), " + autenticacaoService.getUsuarioLogado().get().getNome());
 					} else {
 						System.out.println("Erro: CPF/Email ou senha incorretos!");
 					}
