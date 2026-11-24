@@ -22,6 +22,12 @@ public class UsuarioService {
         return novoUsuario;
     }
 
+    public Optional<Usuario> buscarPorId(int id) {
+        return usuarios.stream()
+                .filter(u -> u.getId() == id)
+                .findFirst();
+    }
+
     public Optional<Usuario> buscarPorCpfOuEmail(String login) {
         return usuarios.stream()
                 .filter(u -> u.getCpf().equals(login) || u.getEmail().equalsIgnoreCase(login))
