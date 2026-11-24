@@ -14,6 +14,7 @@ import service.AutenticacaoService;
 
 import java.time.LocalDate;
 import java.util.List;
+import java.util.Scanner;
 
 public class Main { //Só pra testar
 	public static void main(String[] args) {
@@ -356,6 +357,63 @@ public class Main { //Só pra testar
 		// 5. Exibir histórico de tentativas de login (requisito da Entrega 3)
 		System.out.println("\nHistórico de Logins registrados:");
 		autenticacaoService.getHistoricoLogins().forEach(System.out::println);
+
+			// ===== MODO INTERATIVO PARA APRESENTAÇÃO =====
+		Scanner scanner = new Scanner(System.in);
+		int opcao = -1;
+
+		while (opcao != 0) {
+			System.out.println("\n=== MENU INTERATIVO PIX ===");
+			if (autenticacaoService.estaAutenticado()) {
+				System.out.println("Sessão ativa: " + autenticacaoService.getUsuarioLogado().get().getNome());
+				System.out.println("1 - Sair da conta (Logout)");
+				System.out.println("2 - Ver histórico de logins");
+				System.out.println("0 - Encerrar");
+				System.out.print("Opção: ");
+				opcao = Integer.parseInt(scanner.nextLine());
+
+				if (opcao == 1) {
+					autenticacaoService.logout();
+					System.out.println("Logout realizado com sucesso!");
+				} else if (opcao == 2) {
+					autenticacaoService.getHistoricoLogins().forEach(System.out::println);
+				}
+			} else {
+				System.out.println("1 - Cadastrar novo usuário");
+				System.out.println("2 - Fazer login");
+				System.out.println("0 - Encerrar");
+				System.out.print("Opção: ");
+				opcao = Integer.parseInt(scanner.nextLine());
+
+				if (opcao == 1) {
+					System.out.print("Nome: ");
+					String nome = scanner.nextLine();
+					System.out.print("CPF: ");
+					String cpf = scanner.nextLine();
+					System.out.print("Email: ");
+					String email = scanner.nextLine();
+					System.out.print("Telefone: ");
+					String telefone = scanner.nextLine();
+					System.out.print("Senha: ");
+					String senha = scanner.nextLine();
+
+					usuarioService.cadastrar(nome, cpf, email, telefone, senha);
+					System.out.println("Usuário cadastrado com sucesso!");
+				} else if (opcao == 2) {
+					System.out.print("CPF ou Email: ");
+					String login = scanner.nextLine();
+					System.out.print("Senha: ");
+					String senha = scanner.nextLine();
+
+					if (authService.login(login, senha).isPresent()) {
+						System.out.println("Login aprovado! Bem-vindo(a), " + authService.getUsuarioLogado().get().getNome());
+					} else {
+						System.out.println("Erro: CPF/Email ou senha incorretos!");
+					}
+				}
+			}
+		}
+		scanner.close();
 	}
 
 	//PRA TESTAR TESTAR TESTAR TESTARO CÓDIGO, COPIAR ISSO AQUI DEBAIXO
